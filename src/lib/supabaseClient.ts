@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const supabaseBucketEnv = process.env.NEXT_PUBLIC_SUPABASE_BUCKET ?? "";
 
 export const supabaseEnabled = Boolean(supabaseUrl && supabaseAnonKey);
 
@@ -10,5 +11,5 @@ export const supabase: SupabaseClient | null = supabaseEnabled
       auth: { persistSession: false },
     })
   : null;
-export const supabaseBucket =
-  process.env.NEXT_PUBLIC_SUPABASE_BUCKET ?? "attachments";
+export const supabaseBucketConfigured = Boolean(supabaseBucketEnv);
+export const supabaseBucket = supabaseBucketEnv || "attachments";

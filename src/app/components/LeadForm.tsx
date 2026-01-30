@@ -4,6 +4,7 @@ import { FormEvent, useRef, useState } from "react";
 import {
   supabase,
   supabaseBucket,
+  supabaseBucketConfigured,
   supabaseEnabled,
 } from "@/lib/supabaseClient";
 
@@ -24,62 +25,75 @@ export default function LeadForm({ targetParam }: LeadFormProps) {
     setStatus("submitting");
     setErrorMessage("");
 
-    if (!supabaseEnabled || !supabase) {
-      setStatus("error");
-      setErrorMessage(
-        "Supabaseの環境変数が未設定です。設定後に再度お試しください。"
-      );
-      return;
-    }
-
-    const formData = new FormData(event.currentTarget);
-    const file = formData.get("attachment") as File | null;
-
-    let attachmentUrl = "";
-    if (file && file.size > 0) {
-      setFileSelected(true);
-      const timestamp = Date.now();
-      const sanitizedName = file.name.replace(/\s+/g, "_");
-      const filePath = `leads/${timestamp}_${sanitizedName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from(supabaseBucket)
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
+    try {
+      if (!supabaseEnabled || !supabase) {
         setStatus("error");
-        setErrorMessage("画像のアップロードに失敗しました。");
+        setErrorMessage(
+          "Supabaseの環境変数が未設定です。Vercelの環境変数を確認してください。"
+        );
         return;
       }
 
-      const { data } = supabase.storage
-        .from(supabaseBucket)
-        .getPublicUrl(filePath);
-      attachmentUrl = data.publicUrl;
-    }
+      const formData = new FormData(event.currentTarget);
+      const file = formData.get("attachment") as File | null;
 
-    const { error } = await supabase.from("leads").insert({
-      name: String(formData.get("name") ?? ""),
-      company: String(formData.get("company") ?? ""),
-      email: String(formData.get("email") ?? ""),
-      phone: (formData.get("phone") as string | null) || null,
-      message: String(formData.get("message") ?? ""),
-      target_param: targetParam,
-      attachment_url: attachmentUrl,
-    });
+      let attachmentUrl = "";
+      if (file && file.size > 0) {
+        setFileSelected(true);
+        const timestamp = Date.now();
+        const sanitizedName = file.name.replace(/\s+/g, "_");
+        const filePath = `leads/${timestamp}_${sanitizedName}`;
 
-    if (error) {
+        const { error: uploadError } = await supabase.storage
+          .from(supabaseBucket)
+          .upload(filePath, file, { upsert: true });
+
+        if (uploadError) {
+          setStatus("error");
+          const hint = supabaseBucketConfigured
+            ? ""
+            : "（VercelでNEXT_PUBLIC_SUPABASE_BUCKETが未設定の可能性があります）";
+          setErrorMessage(
+            `画像のアップロードに失敗しました。${hint} ${uploadError.message}`
+          );
+          return;
+        }
+
+        const { data } = supabase.storage
+          .from(supabaseBucket)
+          .getPublicUrl(filePath);
+        attachmentUrl = data.publicUrl;
+      }
+
+      const { error } = await supabase.from("leads").insert({
+        name: String(formData.get("name") ?? ""),
+        company: String(formData.get("company") ?? ""),
+        email: String(formData.get("email") ?? ""),
+        phone: (formData.get("phone") as string | null) || null,
+        message: String(formData.get("message") ?? ""),
+        target_param: targetParam,
+        attachment_url: attachmentUrl,
+      });
+
+      if (error) {
+        setStatus("error");
+        setErrorMessage(
+          `送信に失敗しました。時間をおいて再度お試しください。${error.message}`
+        );
+        return;
+      }
+
+      event.currentTarget.reset();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      setFileSelected(false);
+      setStatus("success");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
       setStatus("error");
-      setErrorMessage("送信に失敗しました。時間をおいて再度お試しください。");
-      return;
+      setErrorMessage(`送信に失敗しました。${message}`);
     }
-
-    event.currentTarget.reset();
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-    setFileSelected(false);
-    setStatus("success");
   };
 
   return (
