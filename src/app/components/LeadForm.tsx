@@ -41,7 +41,9 @@ export default function LeadForm({ targetParam }: LeadFormProps) {
       if (file && file.size > 0) {
         setFileSelected(true);
         const timestamp = Date.now();
-        const sanitizedName = file.name.replace(/\s+/g, "_");
+        const sanitizedName = file.name
+          .replace(/\s+/g, "_")
+          .replace(/[^a-zA-Z0-9._-]/g, "_");
         const filePath = `leads/${timestamp}_${sanitizedName}`;
 
         const { error: uploadError } = await supabase.storage
