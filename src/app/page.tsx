@@ -385,6 +385,14 @@ export default async function Home({
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-6 py-8 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
           <p>株式会社シンプリーロボット</p>
+          <div className="flex gap-4 text-xs">
+            <a className="hover:text-slate-700" href="/privacy-policy">
+              プライバシーポリシー
+            </a>
+            <a className="hover:text-slate-700" href="/tokusho">
+              特定商取引法に基づく表記
+            </a>
+          </div>
           <p>© 2026 Simply Robot. All rights reserved.</p>
         </div>
       </footer>
