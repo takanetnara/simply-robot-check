@@ -24,6 +24,7 @@ export default function LeadForm({ targetParam }: LeadFormProps) {
     event.preventDefault();
     setStatus("submitting");
     setErrorMessage("");
+    const form = event.currentTarget;
 
     try {
       if (!supabaseEnabled || !supabase) {
@@ -34,7 +35,7 @@ export default function LeadForm({ targetParam }: LeadFormProps) {
         return;
       }
 
-      const formData = new FormData(event.currentTarget);
+      const formData = new FormData(form);
       const file = formData.get("attachment") as File | null;
 
       let attachmentUrl = "";
@@ -85,7 +86,7 @@ export default function LeadForm({ targetParam }: LeadFormProps) {
         return;
       }
 
-      event.currentTarget.reset();
+      form.reset();
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
