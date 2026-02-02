@@ -19,6 +19,7 @@ const lpoData = {
     painText:
       "輸送量9万トン以上の荷主には法的義務が発生。トラックを待たせないパレタイズが、経営陣の法的リスクを回避します。",
     imageDesc: "物流効率化法の条文イメージと焦る経営者",
+    imageUrl: "/images/logistics-law-executive.jpg",
   },
   heavy: {
     heroH1: "腰痛離職をゼロにする。\n20kg超の重量物パレタイズ。",
@@ -139,9 +140,25 @@ export default async function Home({
               </p>
             </div>
             <div className="rounded-3xl bg-white/10 p-8 backdrop-blur">
-              <div className="rounded-2xl border border-white/20 bg-white/5 p-6 text-base text-blue-100">
-                {data.imageDesc}
-              </div>
+              {data.imageUrl ? (
+                <div className="overflow-hidden rounded-2xl border border-white/20 bg-white/5">
+                  <div className="relative">
+                    <img
+                      src={data.imageUrl}
+                      alt={data.imageDesc}
+                      className="h-56 w-full object-cover md:h-64"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-blue-950/70 via-blue-950/10 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-base text-white">
+                      {data.imageDesc}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-white/20 bg-white/5 p-6 text-base text-blue-100">
+                  {data.imageDesc}
+                </div>
+              )}
               <div className="mt-6 space-y-3 text-lg text-white">
                 <p className="font-semibold">杉谷が直接対応</p>
                 <p>1台から即導入可能</p>
